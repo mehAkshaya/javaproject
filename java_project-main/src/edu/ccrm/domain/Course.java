@@ -1,58 +1,76 @@
 package edu.ccrm.domain;
 
-// Represents a course. I used the Builder pattern here because it was required.
+/**
+ * Represents a university course.
+ * Uses a custom builder (CourseBuilder) for flexible object creation.
+ */
 public class Course {
-    private String code;
-    private String title;
-    private int credits;
-    private Semester semester;
 
-    // Private constructor so you have to use the Builder.
-    private Course(Builder builder) {
+    private final String code;
+    private final String name;
+    private final int creditHours;
+    private final Semester term;
+
+    // Private constructor to enforce the builder usage
+    private Course(CourseBuilder builder) {
         this.code = builder.code;
-        this.title = builder.title;
-        this.credits = builder.credits;
-        this.semester = builder.semester;
+        this.name = builder.name;
+        this.creditHours = builder.creditHours;
+        this.term = builder.term;
     }
 
     // Getters
     public String getCode() { return code; }
-    public String getTitle() { return title; }
-    public int getCredits() { return credits; }
-    public Semester getSemester() { return semester; }
+    public String getName() { return name; }
+    public int getCreditHours() { return creditHours; }
+    public Semester getTerm() { return term; }
 
     @Override
     public String toString() {
-        return String.format("Course[%s: %s, Credits: %d, Semester: %s]", code, title, credits, semester);
+        return "[Course: " + code + " | " + name +
+               " | Credits=" + creditHours +
+               " | Term=" + term + "]";
     }
-    
-    // A static nested class for the Builder pattern.
-    public static class Builder {
-        private String code;
-        private String title;
-        private int credits;
-        private Semester semester;
 
-        public Builder(String code, String title) {
+    /**
+     * Builder class for Course
+     */
+    public static class CourseBuilder {
+        private final String code;
+        private final String name;
+        private int creditHours = 0;
+        private Semester term = Semester.FALL; // default
+
+        public CourseBuilder(String code, String name) {
             this.code = code;
-            this.title = title;
+            this.name = name;
         }
 
-        public Builder credits(int credits) {
-            this.credits = credits;
-            return this; // Allows for chaining methods like new Course.Builder(...).credits(...).build()
+        public CourseBuilder creditHours(int credits) {
+            this.creditHours = credits;
+            return this;
         }
 
-        public Builder semester(Semester semester) {
-            this.semester = semester;
+        public CourseBuilder term(Semester sem) {
+            this.term = sem;
             return this;
         }
 
         public Course build() {
-            // Some basic validation before creating the object.
-            assert code != null && !code.isEmpty() : "Course code cannot be empty";
-            assert title != null && !title.isEmpty() : "Course title cannot be empty";
+            validate();
             return new Course(this);
+        }
+
+        private void validate() {
+            if (code == null || code.isBlank()) {
+                throw new IllegalStateException("Course code must not be empty.");
+            }
+            if (name == null || name.isBlank()) {
+                throw new IllegalStateException("Course name must not be empty.");
+            }
+            if (creditHours < 0) {
+                throw new IllegalStateException("Credits cannot be negative.");
+            }
         }
     }
 }
